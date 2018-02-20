@@ -1,0 +1,12 @@
+sudo: required
+
+services:
+  - docker
+
+language: bash
+
+script:
+  - export TRAVIS_REPO_NAME=${TRAVIS_REPO_SLUG#*/}
+  - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  - docker build -f Dockerfile.production --pull -t freshcode/$TRAVIS_REPO_NAME .
+  - docker push freshcode/$TRAVIS_REPO_NAME

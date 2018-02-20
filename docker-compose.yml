@@ -1,0 +1,17 @@
+version: '2'
+services:
+  frontend:
+    image: node:8.2.0
+    ports:
+      - 3000:3000
+      - 6006:6006
+    volumes:
+      - .:/vuejs-graphcool-boilerplate
+    entrypoint:
+      - /bin/bash
+    environment:
+      - PORT=3000
+      - HOST=0.0.0.0
+      - GC_MASTER_TOKEN=MuchTokenSuchMasterWow
+    command: -s
+    tty: true

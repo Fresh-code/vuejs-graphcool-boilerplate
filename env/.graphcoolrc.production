@@ -1,0 +1,9 @@
+graphcool-framework:
+  platformToken: >-
+    eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MDkzNTczMjAsImNsaWVudElkIjoiY2o5ZTBkbGZiMm41YzAxNzZhdGx0ZXY2NyJ9.maxW0tYGOtNNix_WNRSJWoAJH5YYwoVViYNU_QeYF-4
+  clusters:
+    prod:
+      host: 'http://graphcool:60000'
+      faasHost: 'http://localfaas:60050'
+      clusterSecret: >-
+        ${CLUSTER_SECRET}

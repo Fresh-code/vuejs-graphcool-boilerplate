@@ -1,0 +1,134 @@
+version: '2'
+volumes:
+  faas-persistence: {}
+  db-persistence: {}
+networks:
+  graphcool:
+    driver: bridge
+services:
+  frontend:
+    image: registry.hub.docker.com/freshcode/vuejs-graphcool-boilerplate
+    ports:
+      - 3000:3000
+    volumes:
+      - /opt/graphcool:/opt/graphcool
+    environment:
+      - PORT=3000
+      - HOST=0.0.0.0
+      - NODE_ENV=production
+      - GC_MASTER_TOKEN=MuchTokenSuchMasterWow
+    labels:
+      io.rancher.container.pull_image: always
+
+  graphcool-db:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: graphcool
+      MYSQL_ROOT_PASSWORD: graphcool
+    networks:
+      - graphcool
+    restart: always
+    command: mysqld --max-connections=1000 --sql-mode="ALLOW_INVALID_DATES,ANSI_QUOTES,ERROR_FOR_DIVISION_BY_ZERO,HIGH_NOT_PRECEDENCE,IGNORE_SPACE,NO_AUTO_CREATE_USER,NO_AUTO_VALUE_ON_ZERO,NO_BACKSLASH_ESCAPES,NO_DIR_IN_CREATE,NO_ENGINE_SUBSTITUTION,NO_FIELD_OPTIONS,NO_KEY_OPTIONS,NO_TABLE_OPTIONS,NO_UNSIGNED_SUBTRACTION,NO_ZERO_DATE,NO_ZERO_IN_DATE,ONLY_FULL_GROUP_BY,PIPES_AS_CONCAT,REAL_AS_FLOAT,STRICT_ALL_TABLES,STRICT_TRANS_TABLES,ANSI,DB2,MAXDB,MSSQL,MYSQL323,MYSQL40,ORACLE,POSTGRESQL,TRADITIONAL"
+    volumes:
+      - db-persistence:/var/lib/mysql
+    labels:
+      io.rancher.container.pull_image: always
+
+  graphcool:
+    image: graphcool/graphcool-dev:0.11.1
+    restart: always
+    ports:
+      - "0.0.0.0:60000:60000"
+    networks:
+      - graphcool
+    depends_on:
+      - graphcool-db
+    environment:
+      API_ENDPOINT_AP_NORTHEAST_1: http://graphcool:60000/simple/v1
+      API_ENDPOINT_EU_WEST_1: http://graphcool:60000/simple/v1
+      API_ENDPOINT_US_WEST_2: http://graphcool:60000/simple/v1
+      AUTH0_API_TOKEN: ''
+      AUTH0_CLIENT_SECRET: ''
+      AUTH0_DOMAIN: ''
+      AWS_ACCESS_KEY_ID: notchecked
+      AWS_CBOR_DISABLE: 'true'
+      AWS_REGION: eu-west-1
+      AWS_SECRET_ACCESS_KEY: notchecked
+      BACKEND_API_SIMPLE_V1_ADDR: http://graphcool:60000/system
+      BUGSNAG_API_KEY: ''
+      CLIENT_API_ADDRESS: http://graphcool:60000/
+      CLOUDWATCH_ENDPOINT: http://graphcool-aws-services:4582
+      DATA_EXPORT_S3_BUCKET: graphcool-data-export
+      DATA_EXPORT_S3_ENDPOINT: http://graphcool-aws-services:4572
+      FILEUPLOAD_AWS_REGION: local
+      FILEUPLOAD_S3_AWS_ACCESS_KEY_ID: notchecked
+      FILEUPLOAD_S3_AWS_SECRET_ACCESS_KEY: notchecked
+      FILEUPLOAD_S3_BUCKET: files.graph.cool
+      FILEUPLOAD_S3_ENDPOINT: http://graphcool-aws-services:4572
+      FUNCTION_ENDPOINT_EXTERNAL: http://graphcool:60050
+      FUNCTION_ENDPOINT_INTERNAL: http://localfaas:60050
+      INITIAL_PRICING_PLAN: 2017-02-free
+      JWT_SECRET: muchsecretwow
+      KINESIS_ENDPOINT: http://graphcool-aws-services:4568
+      KINESIS_STREAM_ALGOLIA_SYNC_QUERY: graphcool-aws-services
+      KINESIS_STREAM_API_METRICS: graphcool-aws-services
+      MASTER_TOKEN: MuchTokenSuchMasterWow
+      PORT: '60000'
+      PRIVATE_CLIENT_API_SECRET: privateClientSecret
+      REDIS_HOST: graphcool-redis-host
+      REDIS_PORT: '6379'
+      SCHEMA_MANAGER_ENDPOINT: http://graphcool:60000/schema-manager
+      SCHEMA_MANAGER_SECRET: evenmoresecretwow
+      SNS_ENDPOINT: http://graphcool-aws-services:4575
+      SNS_ENDPOINT_SYSTEM: http://graphcool-aws-services:4572
+      SNS_FUNCTION_LOGS: ''
+      SNS_SEAT: arn:aws:sns:local:123456789012:crm-loal-Infrastructure-sns-collaborator-signup
+      SQL_CLIENT_CONNECTION_LIMIT: '10'
+      SQL_CLIENT_HOST_AP_NORTHEAST_1_CLIENT1: graphcool-db
+      SQL_CLIENT_HOST_CLIENT1: graphcool-db
+      SQL_CLIENT_HOST_EU_WEST_1_CLIENT1: graphcool-db
+      SQL_CLIENT_HOST: graphcool-db
+      SQL_CLIENT_HOST_READONLY_CLIENT1: graphcool-db
+      SQL_CLIENT_HOST_US_WEST_2_CLIENT1: graphcool-db
+      SQL_CLIENT_PASSWORD_AP_NORTHEAST_1: graphcool
+      SQL_CLIENT_PASSWORD_EU_WEST_1: graphcool
+      SQL_CLIENT_PASSWORD: graphcool
+      SQL_CLIENT_PASSWORD_US_WEST_2: graphcool
+      SQL_CLIENT_PORT: 3306
+      SQL_CLIENT_PORT_AP_NORTHEAST_1: 3306
+      SQL_CLIENT_PORT_EU_WEST_1: 3306
+      SQL_CLIENT_PORT_US_WEST_2: 3306
+      SQL_CLIENT_USER_AP_NORTHEAST_1: root
+      SQL_CLIENT_USER_EU_WEST_1: root
+      SQL_CLIENT_USER: root
+      SQL_CLIENT_USER_US_WEST_2: root
+      SQL_INTERNAL_CONNECTION_LIMIT: 10
+      SQL_INTERNAL_DATABASE: graphcool
+      SQL_INTERNAL_HOST: graphcool-db
+      SQL_INTERNAL_PASSWORD: graphcool
+      SQL_INTERNAL_PORT: 3306
+      SQL_INTERNAL_USER: root
+      SQL_LOGS_CONNECTION_LIMIT: 10
+      SQL_LOGS_DATABASE: logs
+      SQL_LOGS_HOST: graphcool-db
+      SQL_LOGS_PASSWORD: graphcool
+      SQL_LOGS_PORT: 3306
+      SQL_LOGS_USER: root
+      STRIPE_API_KEY:
+      SYSTEM_API_SECRET: not-a-secret
+    labels:
+      io.rancher.container.pull_image: always
+
+  localfaas:
+    image: graphcool/localfaas:0.11.1
+    networks:
+      - graphcool
+    restart: always
+    environment:
+      FUNCTIONS_PORT: 60050
+    ports:
+      - "0.0.0.0:60050:60050"
+    volumes:
+      - faas-persistence:/var/faas
+    labels:
+      io.rancher.container.pull_image: always

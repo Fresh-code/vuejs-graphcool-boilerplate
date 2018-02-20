@@ -1,0 +1,16 @@
+FROM node:8.2.0
+
+RUN mkdir /vuejs-graphcool-boilerplate
+WORKDIR /vuejs-graphcool-boilerplate
+
+COPY . /vuejs-graphcool-boilerplate
+COPY ./env/.graphcoolrc.production /root/.graphcoolrc
+COPY ./env/wait-for-it.sh /opt/
+
+RUN npm install -g graphcool@0.11.5
+RUN cd server && yarn install
+RUN yarn install
+RUN yarn build:back
+RUN yarn build:front
+
+CMD yarn start:production

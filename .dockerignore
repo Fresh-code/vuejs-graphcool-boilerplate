@@ -1,0 +1,15 @@
+.idea/
+migrations/
+node_modules/
+.gitignore
+.gitlab-ci.yml
+database.json
+docker-compose-production.yml
+docker-compose-staging.yml
+docker-compose.yml
+server/.graphcoolrc
+.env
+Dockerfile
+Dockerfile.staging
+Dockerfile.production
+README.md
